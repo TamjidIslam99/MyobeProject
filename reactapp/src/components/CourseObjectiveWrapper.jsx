@@ -1,36 +1,83 @@
-import React, {useState} from 'react'
+import React, {useState,useEffect} from 'react'
 import { CourseObjectiveForm } from './CourseObjectiveForm'
 import {v4 as uuidv4} from 'uuid'
 import { CourseObjective } from './CourseObjective'
 import { EditCourseObjectiveForm } from './EditCourseObjectiveForm';
 import logo from './logos/JU_logo2.png';
 import {Link} from 'react-router-dom'
+import axios from 'axios';
 uuidv4()
 
 export const CourseObjectiveWrapper = () => {
 
     const [courseObjectives, setCourseObjectives] = useState([])
 
-    const addCourseObjective = courseObjective =>  {
-        setCourseObjectives([...courseObjectives, {id: uuidv4(), description: courseObjective, completed: false, isEditing: false}])
-        console.log(courseObjectives)
+    useEffect(() => {
+      axios.get("http://127.0.0.1:8000/api/CO/")
+        .then((res) => {
+          setCourseObjectives(res.data)
+        }).catch(() => {
+          alert("Something went wrong");
+        })
+    }, [])
+    const addCourseObjective = (description) => {
+    
+      const requestData = {
+        description:description,
+  
+        isEditing: false
+      };
+      
+      axios
+        .post('http://127.0.0.1:8000/api/CO/', requestData)
+        .then((response) => {
+          // Handle the response if needed
+          console.log(response.data);
+          setCourseObjectives(prevcourseObjectives => [...prevcourseObjectives, response.data]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-    const deleteCourseObjective = id => {
-      setCourseObjectives(courseObjectives.filter(courseObjective => courseObjective.id !== id))
-
-    }
-
-    const editCourseObjective = id => {
-      setCourseObjectives(courseObjectives.map(courseObjective => courseObjective.id === id ? {...courseObjective, isEditing: !courseObjective.isEditing} : courseObjective))
-    }
-
-    const editDescriptionCourseObjective = (description, id) => {
-      setCourseObjectives(courseObjectives.map(courseObjective => courseObjective.id === id ? {...courseObjective,description, isEditing: !courseObjective.isEditing} : courseObjective))
-    }
-
-    const isComplete = () => {
-      return courseObjectives.length !== 0;
+    
+    const deleteCourseObjective = (id) => {
+      axios.delete(`http://127.0.0.1:8000/api/CO/${id}/`)
+          .then(() => {
+              const newcourseObjectives = courseObjectives.filter(t => {
+                  return t.id !== id
+              });
+              setCourseObjectives(newcourseObjectives);
+          }).catch(() => {
+              alert("Something went wrong");
+          })
+  }
+      const editCourseObjective = id => {
+        setCourseObjectives(courseObjectives.map(courseObjective => courseObjective.id === id ? {...courseObjective, isEditing: !courseObjective.isEditing} : courseObjective))
+      }
+      const editDescriptionCourseObjective = (description,  id) => {
+    const requestData = {
+      description: description,
+       // Include data for the knowledge_level column
+      // Add other properties for additional columns here
     };
+  
+    axios
+      .put(`http://127.0.0.1:8000/api/CO/${id}/`, requestData)
+      .then((response) => {
+        // Handle the response if needed
+        setCourseObjectives(prevcourseObjectives =>
+          prevcourseObjectives.map(courseObjective =>
+            courseObjective.id === id
+              ? { ...courseObjective, description,   isEditing: !courseObjective.isEditing }
+              : courseObjective
+          )
+        );
+        console.log(response.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
     
   return (
     <div className='Wrapper' id='courseobjective'>
@@ -70,34 +117,7 @@ export const CourseObjectiveWrapper = () => {
           </tbody>
         </table>
         
-        <div className='row'>
-            <div className='col-6 text-start'>
-              <Link to='/courseinfo'>
-                <button type='submit' className='btn btn-warning'>Back</button>
-              </Link>
-              
-            </div>
-            <div className='col-6 text-end'>
-              <Link
-                  to={isComplete() ? '/clo' : '#'}
-                  onClick={(e) => {
-                      if (!isComplete()) {
-                          e.preventDefault();
-                          alert("Please add at least one Course Objective.");
-                      }
-                  }}
-              >
-                  <button
-                      type='button'
-                      className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
-                  >
-                      Next
-                  </button>
-              </Link>
-              
-              
-            </div>
-        </div>
+       
     </div>
   )
 }

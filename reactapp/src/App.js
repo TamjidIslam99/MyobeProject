@@ -9,6 +9,7 @@ import { BookReference } from './components/Bookreference';
 import { BookReferenceWrapper } from './components/BookReferenceWrapper';
 import { AttitudeWrapper } from './components/AttitudeWrapper';
 import { SkillWrapper } from './components/SkillWrapper';
+import { CourseObjectiveWrapper } from './components/CourseObjectiveWrapper';
 function App() {
 
     // PEOS FUNCTIONAL WORK HERE /
@@ -17,7 +18,7 @@ function App() {
   return (
 
     <div className="App">
-    <SkillWrapper/>
+    <CourseObjectiveWrapper/>
   </div>
   );
 }

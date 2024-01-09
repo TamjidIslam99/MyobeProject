@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Mission ,PEO ,PLO ,CLO ,Book_reference,Mapping,Attitude,Skill
+from .models import Mission ,PEO ,PLO ,CLO ,Book_reference,Mapping,Attitude,Skill,CO
 
 class MissionSerial(serializers.ModelSerializer):
     class Meta:
@@ -42,5 +42,10 @@ class SkillSerial(serializers.ModelSerializer):
     class Meta:
         model=Skill
         fields='__all__'  
-        
+
+
+class COSerial(serializers.ModelSerializer):
+    class Meta:
+        model=CO
+        fields='__all__'  
                                        

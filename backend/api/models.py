@@ -50,4 +50,6 @@ class Attitude(models.Model):
      description=models.CharField(max_length=50)   
 
 class Skill(models.Model):
-     description=models.CharField(max_length=50)       
+     description=models.CharField(max_length=50)   
+class CO(models.Model):
+     description=models.CharField(max_length=50)  
