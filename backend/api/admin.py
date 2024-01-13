@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Mission,PEO,PLO,CLO,Book_reference,Mapping,Attitude,Skill,CO
+from .models import Mission,PEO,PLO,CLO,Book_reference,Mapping,Attitude,Skill,CO,Vision,Knowledge
 
 # Register your models here.
 class MissionAdmin(admin.ModelAdmin):
@@ -48,4 +48,14 @@ class COAdmin(admin.ModelAdmin):
     list_display = ["description"]
 
 admin.site.register(CO,COAdmin )  
+class VisionAdmin(admin.ModelAdmin):
+    list_display = ["description"]
+
+admin.site.register(Vision,VisionAdmin ) 
+
+
+class KnowledgeAdmin(admin.ModelAdmin):
+    list_display = ["description"]
+
+admin.site.register(Knowledge,KnowledgeAdmin ) 
 

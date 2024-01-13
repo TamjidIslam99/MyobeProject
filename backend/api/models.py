@@ -53,3 +53,11 @@ class Skill(models.Model):
      description=models.CharField(max_length=50)   
 class CO(models.Model):
      description=models.CharField(max_length=50)  
+
+
+class Vision(models.Model):
+     description=models.CharField(max_length=50)
+
+
+class Knowledge(models.Model):
+     description=models.CharField(max_length=50)  

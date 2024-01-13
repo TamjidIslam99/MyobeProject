@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets ,generics
-from .models import Mission,PEO,PLO ,CLO,Mapping,Book_reference,Attitude,Skill,CO
-from .serializers import MissionSerial,PEOSerial,PLOSerial ,CLOSerial,BookSerial,MappingSerializer,AttitudeSerial,SkillSerial,COSerial
+from .models import Mission,PEO,PLO ,CLO,Mapping,Book_reference,Attitude,Skill,CO,Vision,Knowledge
+from .serializers import MissionSerial,PEOSerial,PLOSerial ,CLOSerial,BookSerial,MappingSerializer,AttitudeSerial,SkillSerial,COSerial,VisionSerial,KnowledgeSerial
 # Create your views here.
 class MissionViewSet(viewsets.ModelViewSet):
     serializer_class = MissionSerial
@@ -38,4 +38,13 @@ class SkillViewSet(viewsets.ModelViewSet):
 
 class COViewSet(viewsets.ModelViewSet):
     queryset = CO.objects.all()
-    serializer_class = COSerial        
+    serializer_class = COSerial   
+
+
+class VisionViewSet(viewsets.ModelViewSet):
+    queryset = Vision.objects.all()
+    serializer_class = VisionSerial      
+
+class KnowledgeViewSet(viewsets.ModelViewSet):
+    queryset = Knowledge.objects.all()
+    serializer_class = KnowledgeSerial           
