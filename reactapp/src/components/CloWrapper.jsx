@@ -122,7 +122,36 @@ export const CloWrapper = () => {
             }
           </tbody>
         </table>
-        
+        <div className='row'>
+            <div className='col-6 text-start'>
+              <Link to='/courseobjective'>
+                <button type='submit' className='btn btn-warning'>Back</button>
+              </Link>
+              
+            </div>
+            <div className='col-6 text-end'>
+              <Link
+                  to={isComplete() ? '/clomapplo' : '#'}
+                  onClick={(e) => {
+                      if (!isComplete()) {
+                          e.preventDefault();
+                          alert("Please add at least one CLO.");
+                      }
+                  }}
+              >
+                  <button
+                      type='button'
+                      className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
+                  >
+                      Next
+                  </button>
+              </Link>
+                
+                
+            </div>
+              
+              
+        </div>
        
     </div>
   )

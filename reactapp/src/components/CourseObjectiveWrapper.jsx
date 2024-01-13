@@ -78,7 +78,9 @@ export const CourseObjectiveWrapper = () => {
         console.log(err);
       });
   };
-    
+  const isComplete = () => {
+    return courseObjectives.length !== 0;
+  }; 
   return (
     <div className='Wrapper' id='courseobjective'>
       <div className='row'>
@@ -116,7 +118,34 @@ export const CourseObjectiveWrapper = () => {
             }
           </tbody>
         </table>
-        
+        <div className='row'>
+            <div className='col-6 text-start'>
+              <Link to='/courseinfo'>
+                <button type='submit' className='btn btn-warning'>Back</button>
+              </Link>
+              
+            </div>
+            <div className='col-6 text-end'>
+              <Link
+                  to={isComplete() ? '/clo' : '#'}
+                  onClick={(e) => {
+                      if (!isComplete()) {
+                          e.preventDefault();
+                          alert("Please add at least one Course Objective.");
+                      }
+                  }}
+              >
+                  <button
+                      type='button'
+                      className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
+                  >
+                      Next
+                  </button>
+              </Link>
+              
+              
+            </div>
+        </div>
        
     </div>
   )

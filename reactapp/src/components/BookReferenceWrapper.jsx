@@ -129,7 +129,33 @@ export const BookReferenceWrapper = () => {
             }
           </tbody>
         </table>
-       
+        <div className='row'>
+            <div className='col-6 text-start'>
+              <Link to='/courseassessment'>
+                <button type='submit' className='btn btn-warning'>Back</button>
+              </Link>
+              
+            </div>
+            <div className='col-6 text-end'>
+              <Link
+                  to={isComplete() ? '/' : '#'}
+                  onClick={(e) => {
+                      if (!isComplete()) {
+                          e.preventDefault();
+                          alert("Please add at least one Reference Book.");
+                      }
+                  }}
+              >
+                  <button
+                      type='button'
+                      className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
+                  >
+                      Next
+                  </button>
+              </Link>
+              
+            </div>
+        </div>
     </div>
   )
 }

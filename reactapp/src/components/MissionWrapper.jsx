@@ -61,6 +61,9 @@ const editDescriptionMission = (description, id) => {
         console.log(err);      
       });
 }
+const isComplete = () => {
+  return missions.length !== 0;
+};
     
   return (
     <div className='Wrapper' id='mission'>
@@ -97,7 +100,7 @@ const editDescriptionMission = (description, id) => {
             }
           </tbody>
         </table>
-        {/* <div className='row'>
+        <div className='row'>
             <div className='col-6 text-start'>
               <Link to='/'>
                 <button type='submit' className='btn btn-warning'>Back</button>
@@ -123,8 +126,7 @@ const editDescriptionMission = (description, id) => {
               </Link>
               
             </div>
-        </div> */}
-        
+        </div>
         
     </div>
   )

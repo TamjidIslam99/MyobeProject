@@ -10,5 +10,5 @@ router.register(r'api/book', BookViewSet, 'book')
 router.register(r'api/mappings', MappingViewSet, basename='mapping')
 router.register(r'api/attitude',AttitudeViewSet , basename='attitude')
 router.register(r'api/skill',SkillViewSet , basename='skill')
-router.register(r'api/CO',COViewSet , basename='skill')
+router.register(r'api/CO',COViewSet , basename='CO')
 urlpatterns = router.urls

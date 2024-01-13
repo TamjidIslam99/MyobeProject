@@ -105,6 +105,33 @@ export const PeoWrapper = () => {
             }
           </tbody>
         </table>
+        <div className='row'>
+            <div className='col-6 text-start'>
+              <Link to='/curriculum'>
+                <button type='submit' className='btn btn-warning'>Back</button>
+              </Link>
+              
+            </div>
+            <div className='col-6 text-end'>
+              <Link
+                  to={isComplete() ? '/peomapmission' : '#'}
+                  onClick={(e) => {
+                      if (!isComplete()) {
+                          e.preventDefault();
+                          alert("Please add at least one PEO.");
+                      }
+                  }}
+              >
+                  <button
+                      type='button'
+                      className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
+                  >
+                      Next
+                  </button>
+              </Link>
+              
+            </div>
+        </div>
 
 
     </div>
