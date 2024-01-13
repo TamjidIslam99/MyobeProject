@@ -1,35 +1,70 @@
-import React, {useState} from 'react'
+import React, {useState,useEffect} from 'react'
 import { VisionForm } from './VisionForm'
 import {v4 as uuidv4} from 'uuid'
 import { Vision } from './Vision'
 import { EditVisionForm } from './EditVisionForm';
 import logo from './logos/JU_logo2.png';
 import {Link} from 'react-router-dom'
+import axios from 'axios';
 uuidv4()
 
 export const VisionWrapper = () => {
     const [visions, setVisions] = useState([])
 
-    const addVision = vision =>  {
-        setVisions([...visions, {id: uuidv4(), description: vision, completed: false, isEditing: false}])
-        console.log(visions)
+    useEffect(() => {
+      axios.get("http://127.0.0.1:8000/api/vision/")
+        .then((res) => {
+          setVisions(res.data)
+        }).catch(() => {
+          alert("Something went wrong");
+        })
+    }, [])
+     const addVision = visions => {
+        const requestData = { description: visions, isEditing: false};
+      
+        axios
+          .post('http://127.0.0.1:8000/api/vision/', requestData)
+          .then((response) => {
+            // Handle the response if needed
+            console.log(response.data);
+            setVisions(prevVisions => [...prevVisions, response.data]);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+      const deleteVision = (id) => {
+        axios.delete(`http://127.0.0.1:8000/api/vision/${id}/`)
+            .then(() => {
+                const newVision = visions.filter(t => {
+                    return t.id !== id
+                });
+                setVisions(newVision);
+            }).catch(() => {
+                alert("Something went wrong");
+            })
     }
-    const deleteVision = id => {
-      setVisions(visions.filter(vision => vision.id !== id))
-
-    }
-
     const editVision = id => {
       setVisions(visions.map(vision => vision.id === id ? {...vision, isEditing: !vision.isEditing} : vision))
-    }
-
-    const editDescription = (description, id) => {
-      setVisions(visions.map(vision => vision.id === id ? {...vision,description, isEditing: !vision.isEditing} : vision))
-    }
-    const isComplete = () => {
-      return visions.length !== 0;
-    };
-    
+  }
+  const editDescription = (description, id) => {
+      
+      const requestData = { description: description };
+  
+      axios
+        .put(`http://127.0.0.1:8000/api/vision/${id}/`, requestData)
+        .then((response) => {
+          // Handle the response if needed
+          setVisions(prevVisions => prevVisions.map(vision => vision.id === id ? {...vision,description, isEditing: !vision.isEditing} : vision))
+          console.log(response.data);
+        })
+        .catch((err) => {
+          console.log(err);      
+        });
+  }
+  const isComplete = () => {
+    return visions.length !== 0;
+  };  
   return (
     <div className='Wrapper' id='vision'>
         <div className='row'>
@@ -66,7 +101,7 @@ export const VisionWrapper = () => {
         </table>
         <div className='row'>
             <div className='col-6 text-start'>
-              <Link to='/mission'>
+              <Link to='/vision'>
                 <button type='submit' className='btn btn-warning'>Back</button>
               </Link>
               

@@ -1,31 +1,83 @@
-import React, {useContext} from 'react'
+import React, {useContext, useState,useEffect} from 'react'
 import { KnowledgeForm } from './KnowledgeForm'
 import {v4 as uuidv4} from 'uuid'
 import { Knowledge } from './Knowledge'
 import { EditKnowledgeForm } from './EditKnowledgeForm';
 import IloContext from './Context/IloContext';
+import axios from 'axios';
 uuidv4()
 
 export const KnowledgeWrapper = () => {
 
-  const {knowledges, setKnowledges} = useContext(IloContext);
 
-    const addKnowledge = knowledge =>  {
-        setKnowledges([...knowledges, {id: uuidv4(), description: knowledge, completed: false, isEditing: false}])
-        console.log(knowledges)
-    }
-    const deleteKnowledge = id => {
-      setKnowledges(knowledges.filter(knowledge => knowledge.id !== id))
+  const [knowledges, setKnowledges] = useState([]);
 
-    }
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/knowledge/")
+      .then((res) => {
+        setKnowledges(res.data)
+      }).catch(() => {
+        alert("Something went wrong");
+      })
+  }, [])
+  const addKnowledge = (description) => {
+  
+    const requestData = {
+      description:description,
 
+      isEditing: false
+    };
+    
+    axios
+      .post('http://127.0.0.1:8000/api/knowledge/', requestData)
+      .then((response) => {
+        // Handle the response if needed
+        console.log(response.data);
+        setKnowledges(prevknowledges => [...prevknowledges, response.data]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  
+  const deleteKnowledge = (id) => {
+    axios.delete(`http://127.0.0.1:8000/api/knowledge/${id}/`)
+        .then(() => {
+            const newknowledge = knowledges.filter(t => {
+                return t.id !== id
+            });
+            setKnowledges(newknowledge);
+        }).catch(() => {
+            alert("Something went wrong");
+        })
+}
     const editKnowledge = id => {
       setKnowledges(knowledges.map(knowledge => knowledge.id === id ? {...knowledge, isEditing: !knowledge.isEditing} : knowledge))
     }
+    const editDescriptionKnowledge = (description,  id) => {
+  const requestData = {
+    description: description,
+     // Include data for the knowledge_level column
+    // Add other properties for additional columns here
+  };
 
-    const editDescriptionKnowledge = (description, id) => {
-      setKnowledges(knowledges.map(knowledge => knowledge.id === id ? {...knowledge,description, isEditing: !knowledge.isEditing} : knowledge))
-    }
+  axios
+    .put(`http://127.0.0.1:8000/api/knowledge/${id}/`, requestData)
+    .then((response) => {
+      // Handle the response if needed
+      setKnowledges(prevknowledges =>
+        prevknowledges.map(knowledge =>
+          knowledge.id === id
+            ? { ...knowledge, description,   isEditing: !knowledge.isEditing }
+            : knowledge
+        )
+      );
+      console.log(response.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
     
   return (
     <div className='Wrapper'>
