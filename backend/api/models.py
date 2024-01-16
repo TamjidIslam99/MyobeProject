@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 # Create your models here.
 class Mission(models.Model):
@@ -61,3 +62,20 @@ class Vision(models.Model):
 
 class Knowledge(models.Model):
      description=models.CharField(max_length=50)  
+
+
+class PloMapPeo(models.Model):
+    plo = models.ForeignKey(PLO, on_delete=models.CASCADE)
+    peo = models.ForeignKey(PEO, on_delete=models.CASCADE)
+    correlation_level = models.IntegerField(validators=[MinValueValidator(0)])
+
+    def __str__(self):
+        return f"{self.plo} - {self.peo} - {self.correlation_level}"
+    
+class CloMapPlo(models.Model):
+    clo = models.ForeignKey(CLO, on_delete=models.CASCADE)
+    plo = models.ForeignKey(PLO, on_delete=models.CASCADE)
+    correlation_level = models.IntegerField(validators=[MinValueValidator(0)])
+
+    def __str__(self):
+        return f"{self.clo} - {self.plo} - {self.correlation_level}"     

@@ -1,24 +1,64 @@
-import React, {useContext, useState, useEffect} from 'react'
-import PloContext from "./Context/PloContext";
+import React, {useState, useEffect} from 'react'
 import logo from './logos/JU_logo2.png';
 import {Link} from 'react-router-dom'
-import CloContext from './Context/CloContext';
-
+import axios from 'axios';
 export const CloMapPloTable = () => {
 
-const {plos} = useContext(PloContext);
-const {clos} = useContext(CloContext);
+  const [clos, setClos] = useState([]);
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/clo/")
+      .then((res) => {
+        setClos(res.data)
+      }).catch(() => {
+        alert("Something went wrong");
+      })
+  }, [])
 
-const [mappingCloAndPlo, setMappingCloAndPlo] = useState({});
-const [localMapping, setLocalMapping] = useState(mappingCloAndPlo);
+  const [plos, setPlos] = useState([]);
+  useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/plo/")
+      .then((res) => {
+        setPlos(res.data)
+      }).catch(() => {
+        alert("Something went wrong");
+      })
+  }, [])
+
+const [mappingCloAndPlo, setMappingCloAndPlo] = useState([]);
+const [localMapping, setLocalMapping] = useState({});
 const [savedMapping, setSavedMapping] = useState(false);
-
 
 const isComplete = () => {
   const expectedSize = (clos.length) * (plos.length);
   const actualSize = Object.keys(mappingCloAndPlo).length;
   return actualSize === expectedSize;
 };
+
+
+useEffect(() => {
+  axios.get("http://127.0.0.1:8000/api/clomapplo/")
+    .then((res) => {
+      console.log('Fetched mapping data:', res.data);
+      setMappingCloAndPlo(res.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching mapping data:', error);
+      alert("Something went wrong");
+    });
+}, []);
+
+useEffect(() => {
+  console.log('Updated mappingCloAndPlo:', mappingCloAndPlo);
+  
+  const newLocalMapping = {};
+  mappingCloAndPlo.forEach(temp => {
+    newLocalMapping[`${temp.clo}-${temp.plo}`] = temp.correlation_level;
+  });
+
+  console.log('Updated localMapping:', newLocalMapping);
+  setLocalMapping(newLocalMapping);
+}, [mappingCloAndPlo]);
+
 
 const handleMappingChange = (cloIndex, ploIndex, value) => {
   setLocalMapping(localMapping => ({
@@ -27,11 +67,45 @@ const handleMappingChange = (cloIndex, ploIndex, value) => {
   }));
 };
 
-const handleSave = () => {
-  // Update the main state with the local state
-  setMappingCloAndPlo(localMapping);
-  console.log(mappingCloAndPlo);
-  // Set the savedMapping state to true to indicate that the data is saved
+const handleSave = async () => {
+  console.log(localMapping);
+  for (const key in localMapping) {
+    const [cloIndex, ploIndex] = key.split('-');
+    const correlationData = {
+      clo: parseInt(cloIndex, 10),
+      plo: parseInt(ploIndex, 10),
+      correlation_level: parseInt(localMapping[key], 10),
+    };
+    let flag = false;
+
+    console.log(correlationData);
+    
+    for (const temp of mappingCloAndPlo) {
+      console.log('Checking:', temp);
+      if (correlationData.clo === temp.clo && correlationData.plo === temp.plo) {
+        console.log('Matching!');
+        try {
+          await axios.put(`http://127.0.0.1:8000/api/clomapplo/${temp.id}/`, correlationData);
+          console.log('Edit successful');
+        } catch (error) {
+          console.error('Error while updating correlations:', error);
+          // Handle error
+        }
+        flag = true;
+        break;
+      }
+    }
+
+    if (!flag) {
+      try {
+        const response = await axios.post("http://127.0.0.1:8000/api/clomapplo/", correlationData);
+        console.log('Create successful:', response);
+      } catch (error) {
+        console.error('Error while saving correlations:', error);
+        // Handle error
+      }
+    }
+  }
   setSavedMapping(true);
 };
 
@@ -76,7 +150,7 @@ const handleSave = () => {
                 clos.map((clo,cloIndex)=>(
                     <tr>
                         <td>CLO{cloIndex+1}</td>
-                        <td>{clo.description}</td>
+                        <td>{clo.descriptionCLO}</td>
                         {
                             plos.map((plo,ploIndex)=>(
                                 <td>
@@ -84,8 +158,8 @@ const handleSave = () => {
                                     name="mapping"
                                     id="mapping"
                                     className='form-select'
-                                    value={localMapping[`${cloIndex}-${ploIndex}`] || ''}
-                                    onChange={(e) => handleMappingChange(cloIndex, ploIndex, e.target.value)}
+                                    value={localMapping[`${clo.id}-${plo.id}`] || ''}
+                                    onChange={(e) => handleMappingChange(clo.id, plo.id, e.target.value)}
                                   >
                                     <option value="">select</option>
                                     <option value="1">1</option>
@@ -104,38 +178,7 @@ const handleSave = () => {
             </tbody>
         </table>
         <button type='button' className='btn btn-success mb-5' onClick={handleSave}>Save</button>
-        <div className='row'>
-            <div className='col-6 text-start'>
-              <Link to='/clo'>
-                <button type='submit' className='btn btn-warning'>Back</button>
-              </Link>
-              
-            </div>
-            <div className='col-6 text-end'>
-            <Link
-                to={(isComplete() && savedMapping) ? '/cloPloReasoning' : '#'}
-                onClick={(e) => {
-                    if (!isComplete()) {
-                      e.preventDefault();
-                      alert("Please select values for all fields before proceeding.");
-                    }
-                    else if(!savedMapping)
-                    {
-                      e.preventDefault();
-                      alert("Please save changes");
-                    }
-                }}
-            >
-                <button
-                    type='button'
-                    className={`form-btn btn ${isComplete() ? '' : 'disabled'}`}
-                >
-                    Next
-                </button>
-            </Link>
-              
-            </div>
-        </div>
+        
     </div>
   )
 }

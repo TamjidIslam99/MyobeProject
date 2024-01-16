@@ -24,8 +24,8 @@ export const PloMapPeoTable = () => {
         alert("Something went wrong");
       })
   }, [])
-const [mappingPloAndPeo, setMappingPloAndPeo] = useState({});
-const [localMapping, setLocalMapping] = useState(mappingPloAndPeo);
+const [mappingPloAndPeo, setMappingPloAndPeo] = useState([]);
+const [localMapping, setLocalMapping] = useState({});
 const [savedMapping, setSavedMapping] = useState(false);
 
 const isComplete = () => {
@@ -34,6 +34,32 @@ const isComplete = () => {
   return actualSize === expectedSize;
 };
 
+
+useEffect(() => {
+  axios.get("http://127.0.0.1:8000/api/plomappeo/")
+    .then((res) => {
+      console.log('Fetched mapping data:', res.data);
+      setMappingPloAndPeo(res.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching mapping data:', error);
+      alert("Something went wrong");
+    });
+}, []);
+
+useEffect(() => {
+  console.log('Updated mappingPloAndPeo:', mappingPloAndPeo);
+  
+  const newLocalMapping = {};
+  mappingPloAndPeo.forEach(temp => {
+    newLocalMapping[`${temp.plo}-${temp.peo}`] = temp.correlation_level;
+  });
+
+  console.log('Updated localMapping:', newLocalMapping);
+  setLocalMapping(newLocalMapping);
+}, [mappingPloAndPeo]);
+
+
 const handleMappingChange = (ploIndex, peoIndex, value) => {
   setLocalMapping(localMapping => ({
       ...localMapping,
@@ -41,11 +67,45 @@ const handleMappingChange = (ploIndex, peoIndex, value) => {
   }));
 };
 
-const handleSave = () => {
-  // Update the main state with the local state
-  setMappingPloAndPeo(localMapping);
-  console.log(mappingPloAndPeo);
-  // Set the savedMapping state to true to indicate that the data is saved
+const handleSave = async () => {
+  console.log(localMapping);
+  for (const key in localMapping) {
+    const [ploIndex, peoIndex] = key.split('-');
+    const correlationData = {
+      plo: parseInt(ploIndex, 10),
+      peo: parseInt(peoIndex, 10),
+      correlation_level: parseInt(localMapping[key], 10),
+    };
+    let flag = false;
+
+    console.log(correlationData);
+    
+    for (const temp of mappingPloAndPeo) {
+      console.log('Checking:', temp);
+      if (correlationData.plo === temp.plo && correlationData.peo === temp.peo) {
+        console.log('Matching!');
+        try {
+          await axios.put(`http://127.0.0.1:8000/api/plomappeo/${temp.id}/`, correlationData);
+          console.log('Edit successful');
+        } catch (error) {
+          console.error('Error while updating correlations:', error);
+          // Handle error
+        }
+        flag = true;
+        break;
+      }
+    }
+
+    if (!flag) {
+      try {
+        const response = await axios.post("http://127.0.0.1:8000/api/plomappeo/", correlationData);
+        console.log('Create successful:', response);
+      } catch (error) {
+        console.error('Error while saving correlations:', error);
+        // Handle error
+      }
+    }
+  }
   setSavedMapping(true);
 };
 
@@ -73,7 +133,7 @@ const handleSave = () => {
                     <th>PLO Description</th>
                     {
                         peos.map((peo,index)=>(
-                            <th>PEO 1 {index+1}</th>
+                            <th>PEO {index+1}</th>
                         ))
                     }
                 </tr>
@@ -93,8 +153,8 @@ const handleSave = () => {
                                     name="mapping"
                                     id="mapping"
                                     className='form-select'
-                                    value={localMapping[`${ploIndex}-${peoIndex}`] || ''}
-                                    onChange={(e) => handleMappingChange(ploIndex, peoIndex, e.target.value)}
+                                    value={localMapping[`${plo.id}-${peo.id}`] || ''}
+                                    onChange={(e) => handleMappingChange(plo.id, peo.id, e.target.value)}
                                   >
                                     <option value="">select</option>
                                     <option value="1">1</option>
